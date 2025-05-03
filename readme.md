@@ -1,5 +1,7 @@
 ## GloVe: Global Vectors for Word Representation
 
+Using Machine Learning and Natural Language Processing
+
 
 | nearest neighbors of <br/> <em>frog</em> | Litoria             |  Leptodactylidae | Rana | Eleutherodactylus |
 | --- | ------------------------------- | ------------------- | ---------------- | ------------------- |
