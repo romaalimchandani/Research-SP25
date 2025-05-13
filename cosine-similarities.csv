@@ -2,7 +2,7 @@ import pandas as pd
 
 # Recreate the CRA cosine similarity results
 cra_results = [
-    {
+    { #examples
         "problem": "cottage + Swiss + cake",
         "solution": "cheese",
         "llm_answer": "cheese",
