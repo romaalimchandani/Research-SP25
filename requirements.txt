@@ -1,4 +1,5 @@
 numpy
+Flask
 pandas
 scikit-learn
 plotly
