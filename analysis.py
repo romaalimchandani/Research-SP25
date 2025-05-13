@@ -3,11 +3,8 @@ import pandas as pd
 import plotly.express as px
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
-from cra_data import load_cra_data_from_excel
 
-cra_data = load_cra_data_from_excel("Chat GPT VS Human.xlsx")
-
-# Loading Glove Vectors
+# Loading GloVe Vectors
 def load_glove(glove_path="glove.6B.100d.txt"):
     print("Loading GloVe embeddings...")
     glove = {}
@@ -20,13 +17,13 @@ def load_glove(glove_path="glove.6B.100d.txt"):
     print(f"Loaded {len(glove)} word vectors.")
     return glove
 
-# CRA Data Example
+# CRA Data Example (Replace or expand as needed)
 cra_data = [
     {"words": ["cottage", "Swiss", "cake"], "solution": "cheese", "human_accuracy": 0.78, "llm_answer": "cheese"},
     {"words": ["light", "birthday", "stick"], "solution": "candle", "human_accuracy": 0.66, "llm_answer": "fire"},
     {"words": ["spoon", "cloth", "card"], "solution": "table", "human_accuracy": 0.52, "llm_answer": "table"},
     {"words": ["water", "mine", "deep"], "solution": "well", "human_accuracy": 0.71, "llm_answer": "well"},
-    # Can add more CRA example lines
+    # Add more if needed
 ]
 
 # Cosine Similarity 
@@ -39,7 +36,8 @@ def analyze_cra(glove, cra_data):
     results = []
 
     for item in cra_data:
-        cue_vecs = [glove.get(w.lower()) for w in item["words"] if w.lower() in glove]
+        cue_words = item["words"]
+        cue_vecs = [glove.get(w.lower()) for w in cue_words if w.lower() in glove]
         solution_vec = glove.get(item["solution"].lower())
         llm_vec = glove.get(item["llm_answer"].lower())
 
@@ -47,19 +45,29 @@ def analyze_cra(glove, cra_data):
             print(f"Skipping: missing vectors for {item['words'] + [item['solution']]}")
             continue
 
-        avg_sim = np.mean([cos_sim(v, solution_vec) for v in cue_vecs])
+        # Compute cosine similarities for each cue
+        individual_sims = [cos_sim(v, solution_vec) for v in cue_vecs]
+        avg_sim = np.mean(individual_sims)
         llm_correct = item["llm_answer"].lower() == item["solution"].lower()
 
+        # Build results entry
         results.append({
-            "problem": " + ".join(item["words"]),
+            "problem": " + ".join(cue_words),
+            "cue_1": cue_words[0],
+            "cue_2": cue_words[1],
+            "cue_3": cue_words[2],
             "solution": item["solution"],
             "llm_answer": item["llm_answer"],
             "human_accuracy": item["human_accuracy"],
             "llm_correct": llm_correct,
+            "cos_sim_cue_1": individual_sims[0],
+            "cos_sim_cue_2": individual_sims[1],
+            "cos_sim_cue_3": individual_sims[2],
             "avg_cos_sim": avg_sim
         })
 
-        for word in item["words"]:
+        # For PCA plot
+        for word in cue_words:
             if word.lower() in glove:
                 vectors.append(glove[word.lower()])
                 labels.append(word)
@@ -91,14 +99,19 @@ def plot_3d_semantic_space(vectors, labels, types):
 
 # Main Script
 if __name__ == "__main__":
-    glove = load_glove("glove.6B.100d.txt")  # use "glove_sample.txt" for testing
+    glove = load_glove("glove.6B.100d.txt")  # Use "glove_sample.txt" for testing smaller scale
     results, vecs, labels, types = analyze_cra(glove, cra_data)
 
+    # Save results to CSV
     df = pd.DataFrame(results)
     print("\nCRA Analysis Results:")
     print(df)
+    df.to_csv("cra_cosine_similarity_results.csv", index=False)
+    print("Results saved to 'cra_cosine_similarity_results.csv'")
 
+    # Optional: correlation between human accuracy and LLM correctness
     correlation = df["human_accuracy"].corr(df["llm_correct"].astype(float))
     print(f"\nCorrelation (LLM correctness vs human accuracy): {correlation:.2f}")
 
+    # Plot 3D space
     plot_3d_semantic_space(vecs, labels, types)
