@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
+from cra_data import load_cra_data_from_excel
+
+cra_data = load_cra_data_from_excel("Chat GPT VS Human.xlsx")
 
 # Loading Glove Vectors
 def load_glove(glove_path="glove.6B.100d.txt"):
