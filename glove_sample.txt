@@ -1,2 +1,3 @@
 king 0.123 0.452 ... (50 or 100 dimensions)
 queen 0.124 0.453 ...
+glove = load_glove("glove.6B.100d.txt")
